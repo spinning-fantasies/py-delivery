@@ -3,29 +3,32 @@
 <head>
     <title>Order Status</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
 </head>
 <body>
-    <h1>Order Status</h1>
-    {% if 'user_id' not in session %}
-    <p>Please log in to view your order status.</p>
-    <p><a href="{{ url_for('login') }}">Log In</a></p>
+    <h1>Your Order Status</h1>
+    {% if orders %}
+        <ul>
+            {% for order in orders %}
+                <li>Order ID: {{ order[0] }}</li>
+                <li>Items: {{ order[2] }}</li>
+                <li>Delivery Address: {{ order[3] }}</li>
+                <li>Status: {{ order[4] }}</li>
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                    <form method="post" action="{{ url_for('update_order_status', order_id=order[0]) }}">
+                        <select name="status">
+                            <option value="Pending" {% if order[4] == 'Pending' %} selected {% endif %}>Pending</option>
+                            <option value="Out for delivery" {% if order[4] == 'Out for delivery' %} selected {% endif %}>Out for delivery</option>
+                            <option value="Delivered" {% if order[4] == 'Delivered' %} selected {% endif %}>Delivered</option>
+                        </select>
+                        <input type="submit" value="Update Status">
+                    </form>
+                {% endif %}
+                <br>
+            {% endfor %}
+        </ul>
     {% else %}
-    <table>
-        <tr>
-            <th>Order ID</th>
-            <th>Items</th>
-            <th>Delivery Address</th>
-            <th>Status</th>
-        </tr>
-        {% for order in orders %}
-        <tr>
-            <td>{{ order['id'] }}</td>
-            <td>{{ order['items'] }}</td>
-            <td>{{ order['delivery_address'] }}</td>
-            <td>{{ order['status'] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+        <p>No orders placed yet.</p>
     {% endif %}
 </body>
 </html>

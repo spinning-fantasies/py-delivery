@@ -101,6 +101,7 @@ def place_order():
         delivery_address = request.form['delivery_address']
         status = 'Pending'
         add_order(current_user.get_id(), items, delivery_address, status)
+        flash('Order placed successfully!', 'success')
         return redirect(url_for('order_status'))
 
     return render_template('place_order.html')
@@ -110,6 +111,25 @@ def place_order():
 def order_status():
     orders = get_orders_by_user(current_user.get_id())
     return render_template('order_status.html', orders=orders)
+
+@app.route('/update_order_status/<int:order_id>', methods=['POST'])
+@login_required
+def update_order_status(order_id):
+    if not current_user.is_admin:
+        flash('You are not authorized to update order status.', 'error')
+        return redirect(url_for('order_status'))
+
+    new_status = request.form['status']
+    update_order_status_in_database(order_id, new_status)
+    flash('Order status updated successfully!', 'success')
+    return redirect(url_for('order_status'))
+
+# Function to update the order status in the database
+def update_order_status_in_database(order_id, new_status):
+    with sqlite3.connect('delivery_app.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('UPDATE orders SET status = ? WHERE id = ?', (new_status, order_id))
+        conn.commit()
 
 if __name__ == '__main__':
     create_tables()
