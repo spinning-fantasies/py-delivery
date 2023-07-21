@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Order Status</title>    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+</head>
+<body>
+    <h1>Admin Order Status</h1>
+    {% if orders %}
+        <ul>
+            {% for order in orders %}
+                <li>Order ID: {{ order[0] }}</li>
+                <li>Items: {{ order[2] }}</li>
+                <li>Delivery Address: {{ order[3] }}</li>
+                <li>Status: {{ order[4] }}</li>
+                <form method="post" action="{{ url_for('update_order_status', order_id=order[0]) }}">
+                    <select name="status">
+                        <option value="Pending" {% if order[4] == 'Pending' %} selected {% endif %}>Pending</option>
+                        <option value="Out for delivery" {% if order[4] == 'Out for delivery' %} selected {% endif %}>Out for delivery</option>
+                        <option value="Delivered" {% if order[4] == 'Delivered' %} selected {% endif %}>Delivered</option>
+                    </select>
+                    <input type="submit" value="Update Status">
+                </form>
+                <br>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No orders placed yet.</p>
+    {% endif %}
+</body>
+</html>

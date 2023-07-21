@@ -131,6 +131,24 @@ def update_order_status_in_database(order_id, new_status):
         cursor.execute('UPDATE orders SET status = ? WHERE id = ?', (new_status, order_id))
         conn.commit()
 
+@app.route('/admin_order_status', methods=['GET', 'POST'])
+@login_required
+def admin_order_status():
+    if not current_user.is_admin:
+        flash('You are not authorized to view admin order status.', 'error')
+        return redirect(url_for('order_status'))
+
+    if request.method == 'POST':
+        order_id = request.args.get('order_id')
+        new_status = request.form['status']
+        update_order_status_in_database(order_id, new_status)
+        flash('Order status updated successfully!', 'success')
+        return redirect(url_for('admin_order_status'))
+
+    orders = get_all_orders()
+    return render_template('admin_order_status.html', orders=orders)
+
+
 if __name__ == '__main__':
     create_tables()
     app.run(debug=True)
